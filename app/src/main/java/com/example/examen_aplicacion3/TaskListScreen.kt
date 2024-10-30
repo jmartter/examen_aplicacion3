@@ -4,6 +4,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -32,27 +33,38 @@ fun TaskListScreen(firestore: FirebaseFirestore, navController: NavController) {
     }
 
     Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+        // Tareas
+        Column(modifier = Modifier.weight(1f)) {
+            tasks.forEach { task ->
+                Text(
+                    text = task.nombre,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(8.dp)
+                        .clickable {
+                            selectedTask = task
+                            showDialog = true // Mostrar el diálogo al hacer clic en la tarea
+                        }
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+            }
+        }
+
+        // Botones en la parte inferior
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(16.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
             Button(onClick = { filter = false }) {
                 Text("Pendientes")
             }
             Button(onClick = { filter = true }) {
                 Text("Hechas")
             }
-        }
-        Spacer(modifier = Modifier.height(16.dp))
-        tasks.forEach { task ->
-            Text(
-                text = task.nombre,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(8.dp)
-                    .clickable {
-                        selectedTask = task
-                        showDialog = true // Mostrar el diálogo al hacer clic en la tarea
-                    }
-            )
-            Spacer(modifier = Modifier.height(8.dp))
+            Button(onClick = { navController.navigate("registroDeTareas") }) {
+                Text("Añadir Tarea")
+            }
         }
     }
 
