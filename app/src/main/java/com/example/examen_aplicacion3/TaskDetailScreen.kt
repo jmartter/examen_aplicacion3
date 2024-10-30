@@ -6,9 +6,11 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import com.example.examen_aplicacion3.ui.theme.Examen_aplicacion3Theme
 import com.google.firebase.firestore.FirebaseFirestore
 
@@ -38,20 +40,38 @@ fun TaskDetailScreen(firestore: FirebaseFirestore, taskName: String?, navControl
     }
 
     Column(modifier = Modifier.fillMaxSize().padding(16.dp), verticalArrangement = Arrangement.SpaceBetween) {
+        // Título de la pantalla
+        Text(text = "Tarea", style = MaterialTheme.typography.headlineMedium)
+
         if (errorMessage != null) {
             Text(text = errorMessage ?: "Unknown error", color = MaterialTheme.colorScheme.error)
         } else {
             task?.let {
                 Column {
-                    Text(text = "Nombre: ${it.nombre}")
+                    // Nombre de la tarea
+                    Text(
+                        text = it.nombre,
+                        style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)
+                    )
                     Spacer(modifier = Modifier.height(8.dp))
-                    Text(text = "Descripción: ${it.descripcion}")
+
+                    // Descripción
+                    Text(text = "Descripción: ${it.descripcion}", style = MaterialTheme.typography.bodyMedium)
                     Spacer(modifier = Modifier.height(8.dp))
-                    Text(text = "Fecha: ${it.fecha}")
+
+                    // Fecha
+                    Text(text = "Para el: ${it.fecha}")
                     Spacer(modifier = Modifier.height(8.dp))
-                    Text(text = "Prioridad: ${it.prioridad}")
+
+                    // Prioridad
+                    Text(
+                        text = "Prioridad: ${it.prioridad}",
+                        color = if (it.prioridad == "Alta") MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onBackground
+                    )
                     Spacer(modifier = Modifier.height(8.dp))
-                    Text(text = "Coste: ${it.coste}")
+
+                    // Coste
+                    Text(text = "Tiene un coste de: €${it.coste}", style = MaterialTheme.typography.bodyMedium)
                 }
             }
         }
@@ -61,5 +81,15 @@ fun TaskDetailScreen(firestore: FirebaseFirestore, taskName: String?, navControl
         ) {
             Text("Volver")
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun PreviewTaskDetailScreen() {
+    Examen_aplicacion3Theme {
+        // Utilizar rememberNavController para crear un controlador de navegación simulado
+        val navController = rememberNavController()
+        TaskDetailScreen(FirebaseFirestore.getInstance(), "Tarea de Ejemplo", navController)
     }
 }
