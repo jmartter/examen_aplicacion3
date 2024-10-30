@@ -16,10 +16,17 @@ import com.google.firebase.firestore.ktx.toObjects
 @Composable
 fun TaskListScreen(firestore: FirebaseFirestore, navController: NavController) {
     var tasks by remember { mutableStateOf(listOf<Tarea>()) }
+    var showDialog by remember { mutableStateOf(false) }
+    var selectedTask by remember { mutableStateOf<Tarea?>(null) }
+    var errorMessage by remember { mutableStateOf<String?>(null) }
+    var isLoading by remember { mutableStateOf(false) }
 
+    // Cargar tareas de Firestore
     LaunchedEffect(Unit) {
         firestore.collection("tareas").get().addOnSuccessListener { result ->
             tasks = result.toObjects()
+        }.addOnFailureListener { exception ->
+            errorMessage = "Error loading tasks: ${exception.message}"
         }
     }
 
@@ -31,13 +38,60 @@ fun TaskListScreen(firestore: FirebaseFirestore, navController: NavController) {
                     .fillMaxWidth()
                     .padding(8.dp)
                     .clickable {
-                        navController.navigate("taskDetail/${task.nombre}")
+                        selectedTask = task
+                        showDialog = true // Mostrar el diálogo al hacer clic en la tarea
                     }
             )
             Spacer(modifier = Modifier.height(8.dp))
         }
     }
+
+    // Mostrar mensaje de error si ocurre
+    errorMessage?.let {
+        Text(text = it, color = MaterialTheme.colorScheme.error)
+    }
+
+    // Dialogo para opciones: ver detalles o borrar
+    if (showDialog && selectedTask != null) {
+        AlertDialog(
+            onDismissRequest = { showDialog = false },
+            title = { Text("Opciones de tarea") },
+            text = { Text("¿Qué te gustaría hacer con la tarea ${selectedTask?.nombre}?") },
+            confirmButton = {
+                Button(onClick = {
+                    navController.navigate("taskDetail/${selectedTask?.nombre}")
+                    showDialog = false
+                }) {
+                    Text("Ver detalles")
+                }
+            },
+            dismissButton = {
+                Button(onClick = {
+                    if (!isLoading) {
+                        isLoading = true
+                        selectedTask?.let { task ->
+                            firestore.collection("tareas").document(task.id)
+                                .delete()
+                                .addOnSuccessListener {
+                                    tasks = tasks.filter { it.id != task.id }
+                                    showDialog = false
+                                    isLoading = false
+                                }
+                                .addOnFailureListener { exception ->
+                                    errorMessage = "Error deleting task: ${exception.message}"
+                                    showDialog = false
+                                    isLoading = false
+                                }
+                        }
+                    }
+                }) {
+                    Text("Borrar")
+                }
+            }
+        )
+    }
 }
+
 @Preview(showBackground = true)
 @Composable
 fun TaskListScreenPreview() {

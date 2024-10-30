@@ -1,3 +1,4 @@
+// RegistroDeTareasScreen.kt
 package com.example.examen_aplicacion3
 
 import androidx.compose.foundation.layout.*
@@ -5,13 +6,10 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.Alignment
 import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
-import com.example.examen_aplicacion3.ui.theme.Examen_aplicacion3Theme
 import com.google.firebase.firestore.FirebaseFirestore
 
 @Composable
@@ -21,6 +19,7 @@ fun RegistroDeTareasScreen(modifier: Modifier = Modifier, firestore: FirebaseFir
     var fecha by remember { mutableStateOf("") }
     var prioridad by remember { mutableStateOf("") }
     var coste by remember { mutableStateOf("") }
+    var errorMessage by remember { mutableStateOf<String?>(null) }
 
     Column(
         modifier = modifier
@@ -63,6 +62,9 @@ fun RegistroDeTareasScreen(modifier: Modifier = Modifier, firestore: FirebaseFir
             modifier = Modifier.fillMaxWidth(),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
         )
+        errorMessage?.let {
+            Text(text = it, color = MaterialTheme.colorScheme.error, modifier = Modifier.padding(8.dp))
+        }
         Spacer(modifier = Modifier.height(16.dp))
         Row(
             modifier = Modifier.align(Alignment.CenterHorizontally),
@@ -70,23 +72,27 @@ fun RegistroDeTareasScreen(modifier: Modifier = Modifier, firestore: FirebaseFir
         ) {
             Button(
                 onClick = {
-                    val tarea = Tarea(
-                        id = firestore.collection("tareas").document().id,
-                        nombre = nombre,
-                        descripcion = descripcion,
-                        fecha = fecha,
-                        prioridad = prioridad,
-                        coste = coste.toDouble()
-                    )
-                    firestore.collection("tareas")
-                        .document(tarea.id)
-                        .set(tarea)
-                        .addOnSuccessListener {
-                            navController.navigate("taskList")
-                        }
-                        .addOnFailureListener {
-                            // Handle failure
-                        }
+                    if (coste.toDoubleOrNull() != null) {
+                        val tarea = Tarea(
+                            id = firestore.collection("tareas").document().id,
+                            nombre = nombre,
+                            descripcion = descripcion,
+                            fecha = fecha,
+                            prioridad = prioridad,
+                            coste = coste.toDouble()
+                        )
+                        firestore.collection("tareas")
+                            .document(tarea.id)
+                            .set(tarea)
+                            .addOnSuccessListener {
+                                navController.navigate("taskList")
+                            }
+                            .addOnFailureListener {
+                                errorMessage = "Error al guardar la tarea"
+                            }
+                    } else {
+                        errorMessage = "Coste debe ser un número válido"
+                    }
                 }
             ) {
                 Text("Añadir Tarea")
@@ -99,13 +105,5 @@ fun RegistroDeTareasScreen(modifier: Modifier = Modifier, firestore: FirebaseFir
                 Text("Ver Lista de Tareas")
             }
         }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun RegistroDeTareasScreenPreview() {
-    Examen_aplicacion3Theme {
-        RegistroDeTareasScreen(firestore = FirebaseFirestore.getInstance(), navController = rememberNavController())
     }
 }
