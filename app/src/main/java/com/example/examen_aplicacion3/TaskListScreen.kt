@@ -38,11 +38,11 @@ fun TaskListScreen(firestore: FirebaseFirestore, navController: NavController) {
         }
     }
 }
-
 @Preview(showBackground = true)
 @Composable
-fun TaskDetailScreenPreview() {
+fun TaskListScreenPreview() {
     Examen_aplicacion3Theme {
-        TaskDetailScreen(firestore = FirebaseFirestore.getInstance(), taskName = "sampleTaskName")
+        val navController = rememberNavController()
+        TaskListScreen(firestore = FirebaseFirestore.getInstance(), navController = navController)
     }
 }

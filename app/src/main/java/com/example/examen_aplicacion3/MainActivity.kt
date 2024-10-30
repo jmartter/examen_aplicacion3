@@ -23,18 +23,18 @@ class MainActivity : ComponentActivity() {
         setContent {
             Examen_aplicacion3Theme {
                 val navController = rememberNavController()
-             NavHost(navController = navController, startDestination = "registroDeTareas") {
-    composable("registroDeTareas") {
-        RegistroDeTareasScreen(firestore = firestore, navController = navController)
-    }
-    composable("taskList") {
-        TaskListScreen(firestore = firestore, navController = navController)
-    }
-    composable("taskDetail/{taskName}") { backStackEntry ->
-        val taskName = backStackEntry.arguments?.getString("taskName")
-        TaskDetailScreen(firestore = firestore, taskName = taskName)
-    }
-}
+                NavHost(navController = navController, startDestination = "registroDeTareas") {
+                    composable("registroDeTareas") {
+                        RegistroDeTareasScreen(firestore = firestore, navController = navController)
+                    }
+                    composable("taskList") {
+                        TaskListScreen(firestore = firestore, navController = navController)
+                    }
+                    composable("taskDetail/{taskName}") { backStackEntry ->
+                        val taskName = backStackEntry.arguments?.getString("taskName")
+                        TaskDetailScreen(firestore = firestore, taskName = taskName, navController = navController)
+                    }
+                }
             }
         }
     }
@@ -54,7 +54,7 @@ fun MainActivityPreview() {
             }
             composable("taskDetail/{taskName}") { backStackEntry ->
                 val taskName = backStackEntry.arguments?.getString("taskName")
-                TaskDetailScreen(firestore = FirebaseFirestore.getInstance(), taskName = taskName)
+                TaskDetailScreen(firestore = FirebaseFirestore.getInstance(), taskName = taskName, navController = navController)
             }
         }
     }
