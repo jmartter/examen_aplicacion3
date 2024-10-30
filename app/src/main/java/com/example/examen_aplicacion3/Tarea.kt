@@ -1,9 +1,11 @@
 package com.example.examen_aplicacion3
 
 data class Tarea(
-    val nombre: String,
-    val descripcion: String,
-    val fecha: String,
-    val prioridad: String,
-    val coste: Double
+    val id: String = "",
+    val nombre: String = "",
+    val descripcion: String = "",
+    val fecha: String = "",
+    val prioridad: String = "",
+    val coste: Double = 0.0,
+    val hecha: Boolean = false // Nuevo parámetro
 )
