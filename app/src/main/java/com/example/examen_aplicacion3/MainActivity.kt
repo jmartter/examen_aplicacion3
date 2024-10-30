@@ -4,7 +4,6 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -24,14 +23,18 @@ class MainActivity : ComponentActivity() {
         setContent {
             Examen_aplicacion3Theme {
                 val navController = rememberNavController()
-                NavHost(navController = navController, startDestination = "registroDeTareas") {
-                    composable("registroDeTareas") {
-                        RegistroDeTareasScreen(firestore = firestore, navController = navController)
-                    }
-                    composable("taskList") {
-                        TaskListScreen(firestore = firestore)
-                    }
-                }
+             NavHost(navController = navController, startDestination = "registroDeTareas") {
+    composable("registroDeTareas") {
+        RegistroDeTareasScreen(firestore = firestore, navController = navController)
+    }
+    composable("taskList") {
+        TaskListScreen(firestore = firestore, navController = navController)
+    }
+    composable("taskDetail/{taskName}") { backStackEntry ->
+        val taskName = backStackEntry.arguments?.getString("taskName")
+        TaskDetailScreen(firestore = firestore, taskName = taskName)
+    }
+}
             }
         }
     }
@@ -47,7 +50,11 @@ fun MainActivityPreview() {
                 RegistroDeTareasScreen(firestore = FirebaseFirestore.getInstance(), navController = navController)
             }
             composable("taskList") {
-                TaskListScreen(firestore = FirebaseFirestore.getInstance())
+                TaskListScreen(firestore = FirebaseFirestore.getInstance(), navController = navController)
+            }
+            composable("taskDetail/{taskName}") { backStackEntry ->
+                val taskName = backStackEntry.arguments?.getString("taskName")
+                TaskDetailScreen(firestore = FirebaseFirestore.getInstance(), taskName = taskName)
             }
         }
     }

@@ -70,9 +70,17 @@ fun RegistroDeTareasScreen(modifier: Modifier = Modifier, firestore: FirebaseFir
         ) {
             Button(
                 onClick = {
-                    val tarea = Tarea(nombre, descripcion, fecha, prioridad, coste.toDouble())
+                    val tarea = Tarea(
+                        id = firestore.collection("tareas").document().id,
+                        nombre = nombre,
+                        descripcion = descripcion,
+                        fecha = fecha,
+                        prioridad = prioridad,
+                        coste = coste.toDouble()
+                    )
                     firestore.collection("tareas")
-                        .add(tarea)
+                        .document(tarea.id)
+                        .set(tarea)
                         .addOnSuccessListener {
                             navController.navigate("taskList")
                         }
