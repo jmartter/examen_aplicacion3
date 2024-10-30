@@ -9,10 +9,13 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.Alignment
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import com.example.examen_aplicacion3.ui.theme.Examen_aplicacion3Theme
+import com.google.firebase.firestore.FirebaseFirestore
 
 @Composable
-fun RegistroDeTareasScreen(modifier: Modifier = Modifier) {
+fun RegistroDeTareasScreen(modifier: Modifier = Modifier, firestore: FirebaseFirestore, navController: NavController) {
     var nombre by remember { mutableStateOf("") }
     var descripcion by remember { mutableStateOf("") }
     var fecha by remember { mutableStateOf("") }
@@ -63,9 +66,15 @@ fun RegistroDeTareasScreen(modifier: Modifier = Modifier) {
         Spacer(modifier = Modifier.height(16.dp))
         Button(
             onClick = {
-                // Aquí puedes añadir la lógica para guardar la tarea
                 val tarea = Tarea(nombre, descripcion, fecha, prioridad, coste.toDouble())
-                // Añadir tarea a la lista
+                firestore.collection("tareas")
+                    .add(tarea)
+                    .addOnSuccessListener {
+                        navController.navigate("taskList")
+                    }
+                    .addOnFailureListener {
+                        // Handle failure
+                    }
             },
             modifier = Modifier.align(Alignment.CenterHorizontally)
         ) {
@@ -78,6 +87,6 @@ fun RegistroDeTareasScreen(modifier: Modifier = Modifier) {
 @Composable
 fun RegistroDeTareasScreenPreview() {
     Examen_aplicacion3Theme {
-        RegistroDeTareasScreen()
+        RegistroDeTareasScreen(firestore = FirebaseFirestore.getInstance(), navController = rememberNavController())
     }
 }
