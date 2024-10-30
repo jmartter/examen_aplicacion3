@@ -73,14 +73,15 @@ fun RegistroDeTareasScreen(modifier: Modifier = Modifier, firestore: FirebaseFir
             Button(
                 onClick = {
                     if (coste.toDoubleOrNull() != null) {
-                        val tarea = Tarea(
-                            id = firestore.collection("tareas").document().id,
-                            nombre = nombre,
-                            descripcion = descripcion,
-                            fecha = fecha,
-                            prioridad = prioridad,
-                            coste = coste.toDouble()
-                        )
+                      val tarea = Tarea(
+    id = firestore.collection("tareas").document().id,
+    nombre = nombre,
+    descripcion = descripcion,
+    fecha = fecha,
+    prioridad = prioridad,
+    coste = coste.toDouble(),
+    hecha = false // Por defecto, las tareas se crean como pendientes
+)
                         firestore.collection("tareas")
                             .document(tarea.id)
                             .set(tarea)

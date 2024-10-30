@@ -20,10 +20,11 @@ fun TaskListScreen(firestore: FirebaseFirestore, navController: NavController) {
     var selectedTask by remember { mutableStateOf<Tarea?>(null) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
     var isLoading by remember { mutableStateOf(false) }
+    var filter by remember { mutableStateOf(false) } // Por defecto, mostrar tareas pendientes
 
     // Cargar tareas de Firestore
-    LaunchedEffect(Unit) {
-        firestore.collection("tareas").get().addOnSuccessListener { result ->
+    LaunchedEffect(filter) {
+        firestore.collection("tareas").whereEqualTo("hecha", filter).get().addOnSuccessListener { result ->
             tasks = result.toObjects()
         }.addOnFailureListener { exception ->
             errorMessage = "Error loading tasks: ${exception.message}"
@@ -31,6 +32,15 @@ fun TaskListScreen(firestore: FirebaseFirestore, navController: NavController) {
     }
 
     Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+            Button(onClick = { filter = false }) {
+                Text("Pendientes")
+            }
+            Button(onClick = { filter = true }) {
+                Text("Hechas")
+            }
+        }
+        Spacer(modifier = Modifier.height(16.dp))
         tasks.forEach { task ->
             Text(
                 text = task.nombre,
@@ -51,7 +61,7 @@ fun TaskListScreen(firestore: FirebaseFirestore, navController: NavController) {
         Text(text = it, color = MaterialTheme.colorScheme.error)
     }
 
-    // Dialogo para opciones: ver detalles o borrar
+    // Dialogo para opciones: ver detalles, borrar o marcar como hecha
     if (showDialog && selectedTask != null) {
         AlertDialog(
             onDismissRequest = { showDialog = false },
@@ -66,37 +76,47 @@ fun TaskListScreen(firestore: FirebaseFirestore, navController: NavController) {
                 }
             },
             dismissButton = {
-                Button(onClick = {
-                    if (!isLoading) {
-                        isLoading = true
+                Column {
+                    Button(onClick = {
+                        if (!isLoading) {
+                            isLoading = true
+                            selectedTask?.let { task ->
+                                firestore.collection("tareas").document(task.id)
+                                    .delete()
+                                    .addOnSuccessListener {
+                                        tasks = tasks.filter { it.id != task.id }
+                                        showDialog = false
+                                        isLoading = false
+                                    }
+                                    .addOnFailureListener { exception ->
+                                        errorMessage = "Error deleting task: ${exception.message}"
+                                        showDialog = false
+                                        isLoading = false
+                                    }
+                            }
+                        }
+                    }) {
+                        Text("Borrar")
+                    }
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Button(onClick = {
                         selectedTask?.let { task ->
                             firestore.collection("tareas").document(task.id)
-                                .delete()
+                                .update("hecha", true)
                                 .addOnSuccessListener {
                                     tasks = tasks.filter { it.id != task.id }
                                     showDialog = false
-                                    isLoading = false
                                 }
                                 .addOnFailureListener { exception ->
-                                    errorMessage = "Error deleting task: ${exception.message}"
+                                    errorMessage = "Error updating task: ${exception.message}"
                                     showDialog = false
-                                    isLoading = false
                                 }
                         }
+                    }) {
+                        Text("Hecha")
                     }
-                }) {
-                    Text("Borrar")
                 }
             }
         )
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun TaskListScreenPreview() {
-    Examen_aplicacion3Theme {
-        val navController = rememberNavController()
-        TaskListScreen(firestore = FirebaseFirestore.getInstance(), navController = navController)
     }
 }
