@@ -64,21 +64,32 @@ fun RegistroDeTareasScreen(modifier: Modifier = Modifier, firestore: FirebaseFir
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
         )
         Spacer(modifier = Modifier.height(16.dp))
-        Button(
-            onClick = {
-                val tarea = Tarea(nombre, descripcion, fecha, prioridad, coste.toDouble())
-                firestore.collection("tareas")
-                    .add(tarea)
-                    .addOnSuccessListener {
-                        navController.navigate("taskList")
-                    }
-                    .addOnFailureListener {
-                        // Handle failure
-                    }
-            },
-            modifier = Modifier.align(Alignment.CenterHorizontally)
+        Row(
+            modifier = Modifier.align(Alignment.CenterHorizontally),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            Text("Añadir Tarea")
+            Button(
+                onClick = {
+                    val tarea = Tarea(nombre, descripcion, fecha, prioridad, coste.toDouble())
+                    firestore.collection("tareas")
+                        .add(tarea)
+                        .addOnSuccessListener {
+                            navController.navigate("taskList")
+                        }
+                        .addOnFailureListener {
+                            // Handle failure
+                        }
+                }
+            ) {
+                Text("Añadir Tarea")
+            }
+            Button(
+                onClick = {
+                    navController.navigate("taskList")
+                }
+            ) {
+                Text("Ver Lista de Tareas")
+            }
         }
     }
 }
